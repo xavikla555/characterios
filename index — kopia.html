@@ -34,15 +34,16 @@
         }
 
         @media (max-width: 1000px) { /* gdy szerokość ekranu <= 767px, czyli dla urządzeń mobilnych */
-            #gallery-container {
-                width: 100vw; /* 100% szerokości ekranu */
-                height: 100vh; /* 100% wysokości ekranu */
-            }
-            #current-img {
-                max-width: 100%;
-                max-height: 100%;
-            }
-        }
+  #gallery-container {
+    width: 100vw; /* 100% szerokości ekranu */
+    height: 100vh; /* 100% wysokości ekranu */
+  }
+  #current-img {
+    max-width: 100%;
+    max-height: 100%;
+  }
+}
+
     </style>
 </head>
 <body>
@@ -59,8 +60,8 @@
     ];
 
     let currentIndex = 0;
-    let touchStartX = null;
-    let touchEndX = null;
+    let dragStartX = null;
+    let dragEndX = null;
 
     function showImage(index) {
         const img = document.getElementById("current-img");
@@ -77,47 +78,50 @@
         }
     });
 
-    window.addEventListener("touchstart", e => {
-        touchStartX = e.touches[0].pageX;
+    window.addEventListener("mousedown", e => {
+        dragStartX = e.pageX;
     });
 
-    window.addEventListener("touchmove", e => {
-        if (touchStartX !== null) {
-            touchEndX = e.touches[0].pageX;
+    window.addEventListener("mousemove", e => {
+        if (dragStartX !== null) {
+            dragEndX = e.pageX;
         }
     });
 
-    window.addEventListener("touchend", e => {
-        if (touchStartX !== null && touchEndX !== null) {
-            const diffX = touchEndX - touchStartX;
+    window.addEventListener("mouseup", e => {
+        if (dragStartX !== null && dragEndX !== null) {
+            const diffX = dragEndX - dragStartX;
             if (diffX > 0) {
                 showImage(currentIndex === 0 ? images.length - 1 : currentIndex - 1);
             } else if (diffX < 0) {
                 showImage((currentIndex + 1) % images.length);
             }
         }
-        touchStartX = null;
-        touchEndX = null;
+        dragStartX = null;
+        dragEndX = null;
     });
 
     document.addEventListener("wheel", e => {
         e.preventDefault();
         if (e.deltaY < 0) {
-            showImage(currentIndex === 0 ? images.length -1 : currentIndex - 1);
-} else if (e.deltaY > 0) {
-showImage((currentIndex + 1) % images.length);
-}
-});
+            showImage(currentIndex === 0 ? images.length - 1 : currentIndex - 1);
+        } else if (e.deltaY > 0) {
+            showImage((currentIndex + 1) % images.length);
+        }
+    });
 
-window.addEventListener("hashchange", () => {
-const index = parseInt(location.hash.substring(1));
-if (!isNaN(index) && index >= 0 && index < images.length) {
-showImage(index);
-}
-});
+    window.addEventListener("hashchange", () => {
+        const index = parseInt(location.hash.slice(1));
+        if (!isNaN(index) && index >= 0 && index < images.length && index !== currentIndex) {
+            showImage(index);
+        }
+    });
 
-showImage(0);
-
+    const hashIndex = parseInt(location.hash.slice(1));
+    if (!isNaN(hashIndex) && hashIndex >= 0 && hashIndex < images.length) {
+        currentIndex = hashIndex;
+    }
+    showImage(currentIndex);
 </script>
 </body>
 </html>
