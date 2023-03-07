@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Galeria zdjęć</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #gallery-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #current-img {
+            max-width: 80%;
+            max-height: 80%;
+            user-select: none;
+        }
+
+        img {
+            user-select: none;
+            -webkit-user-drag: none;
+            -moz-user-select: none;
+            user-drag: none;
+        }
+
+        @media (max-width: 767px) { /* gdy szerokość ekranu <= 767px, czyli dla urządzeń mobilnych */
+  #gallery-container {
+    width: 100vw; /* 100% szerokości ekranu */
+    height: 100vh; /* 100% wysokości ekranu */
+  }
+  #current-img {
+    max-width: 100%;
+    max-height: 100%;
+  }
+}
+
+    </style>
+</head>
+<body>
+<div id="gallery-container">
+    <img id="current-img" src="">
+</div>
+
+<script>
+    const images = [
+        "img/0.png",
+        "img/1.png",
+        "img/2.png",
+        "img/3.png"
+    ];
+
+    let currentIndex = 0;
+    let dragStartX = null;
+    let dragEndX = null;
+
+    function showImage(index) {
+        const img = document.getElementById("current-img");
+        img.src = images[index];
+        currentIndex = index;
+        history.replaceState(null, null, `#${currentIndex}`);
+    }
+
+    window.addEventListener("keydown", e => {
+        if (e.key === "ArrowLeft") {
+            showImage(currentIndex === 0 ? images.length - 1 : currentIndex - 1);
+        } else if (e.key === "ArrowRight") {
+            showImage((currentIndex + 1) % images.length);
+        }
+    });
+
+    window.addEventListener("mousedown", e => {
+        dragStartX = e.pageX;
+    });
+
+    window.addEventListener("mousemove", e => {
+        if (dragStartX !== null) {
+            dragEndX = e.pageX;
+        }
+    });
+
+    window.addEventListener("mouseup", e => {
+        if (dragStartX !== null && dragEndX !== null) {
+            const diffX = dragEndX - dragStartX;
+            if (diffX > 0) {
+                showImage(currentIndex === 0 ? images.length - 1 : currentIndex - 1);
+            } else if (diffX < 0) {
+                showImage((currentIndex + 1) % images.length);
+            }
+        }
+        dragStartX = null;
+        dragEndX = null;
+    });
+
+    document.addEventListener("wheel", e => {
+        e.preventDefault();
+        if (e.deltaY < 0) {
+            showImage(currentIndex === 0 ? images.length - 1 : currentIndex - 1);
+        } else if (e.deltaY > 0) {
+            showImage((currentIndex + 1) % images.length);
+        }
+    });
+
+    window.addEventListener("hashchange", () => {
+        const index = parseInt(location.hash.slice(1));
+        if (!isNaN(index) && index >= 0 && index < images.length && index !== currentIndex) {
+            showImage(index);
+        }
+    });
+
+    const hashIndex = parseInt(location.hash.slice(1));
+    if (!isNaN(hashIndex) && hashIndex >= 0 && hashIndex < images.length) {
+        currentIndex = hashIndex;
+    }
+    showImage(currentIndex);
+</script>
+</body>
+</html>
