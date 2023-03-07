@@ -66,7 +66,7 @@
         const img = document.getElementById("current-img");
         img.src = images[index];
         currentIndex = index;
-        history.replaceState(null, null, `#${currentIndex}`);
+        window.location.hash = `#${currentIndex}`;
     }
 
     window.addEventListener("keydown", e => {
@@ -90,9 +90,9 @@
     window.addEventListener("touchend", e => {
         if (touchStartX !== null && touchEndX !== null) {
             const diffX = touchEndX - touchStartX;
-            if (diffX > 0) {
+            if (diffX > 50) { // przesunięcie w prawo musi być większe niż 50 pikseli, aby zostało uznane za gest w prawo
                 showImage(currentIndex === 0 ? images.length - 1 : currentIndex - 1);
-            } else if (diffX < 0) {
+            } else if (diffX < -50) { // przesunięcie w lewo musi być mniejsze niż -50 pikseli, aby zostało uznane za gest w lewo
                 showImage((currentIndex + 1) % images.length);
             }
         }
@@ -101,23 +101,21 @@
     });
 
     document.addEventListener("wheel", e => {
-        e.preventDefault();
-        if (e.deltaY < 0) {
-            showImage(currentIndex === 0 ? images.length -1 : currentIndex - 1);
-} else if (e.deltaY > 0) {
+        if (e.deltaY > 0) {
 showImage((currentIndex + 1) % images.length);
+} else if (e.deltaY < 0) {
+showImage(currentIndex === 0 ? images.length - 1 : currentIndex - 1);
 }
 });
-
-window.addEventListener("hashchange", () => {
-const index = parseInt(location.hash.substring(1));
-if (!isNaN(index) && index >= 0 && index < images.length) {
-showImage(index);
-}
+window.addEventListener("load", () => {
+    // odczytaj index z adresu URL
+    const hashIndex = parseInt(window.location.hash.substr(1));
+    if (!isNaN(hashIndex) && hashIndex >= 0 && hashIndex < images.length) {
+        showImage(hashIndex);
+    } else {
+        showImage(0);
+    }
 });
-
-showImage(0);
-
 </script>
 </body>
 </html>
